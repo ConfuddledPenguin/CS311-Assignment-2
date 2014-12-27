@@ -7,18 +7,27 @@ public class InputFile {
 	private static int INPUT_BUFFER_SIZE = 256;
 	private InputStream input;
 	private char lastChar;
+	private char lastTwoChar;
 	private boolean lastCharUnconsumed;
+	private boolean lastTwoCharUnconsumed;
 
 	private byte[] inputBuffer;
 	private int inputBufferPos;
 	private int inputBytesLeftInBuffer;
 
+	/**
+	 * Default Constructor for the InputFile
+	 * 
+	 * @param filename
+	 * @throws FileNotFoundException
+	 */
 	InputFile(String filename) throws FileNotFoundException {
 		this.input = new FileInputStream(filename);
 		this.inputBuffer = new byte[INPUT_BUFFER_SIZE];
 		this.inputBufferPos = INPUT_BUFFER_SIZE;
 		this.inputBytesLeftInBuffer = 0;
 		this.lastCharUnconsumed = false;
+		lastTwoCharUnconsumed = false;
 	}
 
 	private char getNextChar() throws Globals.ReadPastEndOfFileException {
@@ -60,8 +69,13 @@ public class InputFile {
 		if (this.lastCharUnconsumed) {
 			this.lastCharUnconsumed = false;
 			return this.lastChar;
+		}else if(lastTwoCharUnconsumed){
+			lastTwoCharUnconsumed = false;
+			lastCharUnconsumed = true;
+			return lastTwoChar;
 		} else {
 			final char nextChar = getNextChar();
+			lastTwoChar = lastChar;
 			this.lastChar = nextChar;
 			return nextChar;
 		}
@@ -69,6 +83,10 @@ public class InputFile {
 
 	public void unconsumeChar() {
 		this.lastCharUnconsumed = true;
+	}
+	
+	public void unconsumeTwoChar(){
+		lastTwoCharUnconsumed = true;
 	}
 
 }

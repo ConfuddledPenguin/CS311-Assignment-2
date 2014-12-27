@@ -50,9 +50,16 @@ public abstract class LexicalAnalyser {
 
 	InputFile input;
 
+	/**
+	 * Default Constructor for the LexicalAnalyser
+	 * 
+	 * @param filename
+	 * @throws FileNotFoundException
+	 */
 	LexicalAnalyser(String filename) throws FileNotFoundException {
-		this.input = new InputFile(filename);
-		this.keywords = getKeywords();
+		
+		this.input = new InputFile(filename); //get new file
+		this.keywords = getKeywords(); //get the keywords
 		this.atEndOfInput = false;
 		this.lastSymbol = new StringBuffer("");
 		try {
@@ -76,6 +83,7 @@ public abstract class LexicalAnalyser {
 		if (this.lastError != null) {
 			throw this.lastError;
 		}
+		
 		if (this.lastLexeme.equals(target)) {
 			try {
 				this.lastLexeme = getNextSymbol();
@@ -128,6 +136,12 @@ public abstract class LexicalAnalyser {
 		}
 	}
 
+	/**
+	 * 
+	 * 
+	 * @return
+	 * @throws Globals.LexicalError
+	 */
 	private String getNextSymbol() throws Globals.LexicalError {
 
 		String res;
@@ -152,6 +166,8 @@ public abstract class LexicalAnalyser {
 				}
 			} else if (numeral()) {
 				res = "numeral";
+			} else if (equals()){
+				res = "equals";
 			} else if (puncutator()) {
 				res = this.lastSymbol.toString();
 			} else {
@@ -167,7 +183,6 @@ public abstract class LexicalAnalyser {
 		}
 
 		return res;
-
 	}
 
 	private boolean haveComment() {
@@ -237,6 +252,36 @@ public abstract class LexicalAnalyser {
 		}
 		return res;
 	}
+	
+	private boolean equals(){
+		
+		boolean res = false;
+		
+		try {
+			char nextChar = this.input.nextChar();
+
+			if (nextChar == '=') {
+				
+				char secondChar = this.input.nextChar();
+
+				if (secondChar == '=') {
+					this.lastSymbol.append("==");
+					res = true;
+				} else {
+					this.input.unconsumeTwoChar();
+				}
+				
+			} else {
+				this.input.unconsumeChar();
+			}
+
+		} catch (Globals.ReadPastEndOfFileException e) {
+			this.atEndOfInput = true;
+		}
+		
+		return res;
+		
+	}
 
 	private boolean puncutator() {
 		boolean res = false;
@@ -256,9 +301,9 @@ public abstract class LexicalAnalyser {
 			case ']':
 			case '+':
 			case '-':
+			case '=':
 			case '*':
 			case '/':
-			case '=':
 			case '&':
 			case '^':
 			case '.':
@@ -304,8 +349,7 @@ public abstract class LexicalAnalyser {
 	}
 
 	/**
-	 * 
-	 any sequence of alphanumeric characters starting with a letter, ie
+	 * any sequence of alphanumeric characters starting with a letter, ie
 	 * 
 	 * [a-zA-Z][a-zA-Z0-9]*
 	 * 

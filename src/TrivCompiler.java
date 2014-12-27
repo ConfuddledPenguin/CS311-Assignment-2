@@ -6,8 +6,18 @@ public class TrivCompiler {
 
 	LexicalAnalyser la;
 
+	/**
+	 * Default constructor for the TrivCompiler
+	 * 
+	 * @param filename
+	 * @throws FileNotFoundException
+	 */
 	TrivCompiler(String filename) throws FileNotFoundException {
 		this.la = new LexicalAnalyser(filename) {
+			
+			/**
+			 * Set the keywords to hunt for
+			 */
 			@Override
 			Set<String> getKeywords() {
 				Set<String> k = new HashSet<>();
@@ -18,6 +28,12 @@ public class TrivCompiler {
 		};
 	}
 
+	/**
+	 * It starts here
+	 * 
+	 * @param args
+	 * @throws Exception
+	 */
 	public static void main(String[] args) throws Exception {
 
 		TrivCompiler tc = new TrivCompiler("examples/example1.triv");
@@ -27,10 +43,9 @@ public class TrivCompiler {
 
 	public void e0() throws Exception {
 		e1();
-		while (this.la.have("=")) {
+		while (this.la.have("equals")) {
 			System.out.println(this.la.getLastSymbol());
 			e0();
-
 		}
 	}
 
@@ -43,12 +58,18 @@ public class TrivCompiler {
 	}
 
 	public void e2() throws Exception {
-		if (this.la.have("numeral")) {
-			System.out.println(this.la.getLastSymbol());
-		} else if (this.la.have("identifier")) {
-			System.out.println(this.la.getLastSymbol());
-		} else if (this.la.have("booleanLiteral")) {
-			System.out.println(this.la.getLastSymbol());
+		try{
+			if (this.la.have("numeral")) {
+				System.out.println(this.la.getLastSymbol());
+			} else if (this.la.have("identifier")) {
+				System.out.println(this.la.getLastSymbol());
+			} else if (this.la.have("booleanLiteral")) {
+				System.out.println(this.la.getLastSymbol());
+			}else{
+				throw new Exception("Can't have an empty expression");
+			}
+		}catch (Exception e){
+			throw new Exception("Unrecognised symbol");
 		}
 	}
 
