@@ -78,6 +78,15 @@ public abstract class LexicalAnalyser {
 	public String getLastSymbol() {
 		return this.lastSymbolBuffer;
 	}
+	
+	public boolean isLastType(String target){
+
+		
+		if(target.equals(lastLexeme)){
+			return true;
+		}
+		return false;
+	}
 
 	public boolean have(String target) throws Exception {
 		if (this.lastError != null) {

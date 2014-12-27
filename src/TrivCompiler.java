@@ -5,6 +5,26 @@ import java.util.Set;
 public class TrivCompiler {
 
 	LexicalAnalyser la;
+	private enum Type {
+		INTEGER{
+			@Override
+			public String toString(){
+				return "numeral";
+			}
+		},
+		BOOLEAN{
+			@Override
+			public String toString() {
+				return "booleanLiteral";
+			}
+		},
+		IDENTIFIER{
+			@Override
+			public String toString() {
+				return "identifier";
+			}
+		}
+	};
 
 	/**
 	 * Default constructor for the TrivCompiler
@@ -41,36 +61,55 @@ public class TrivCompiler {
 
 	}
 
-	public void e0() throws Exception {
-		e1();
+	public Type e0() throws Exception {
+		Type type = e1();
 		while (this.la.have("equals")) {
-			System.out.println(this.la.getLastSymbol());
-			e0();
+			if(la.isLastType(type.toString())){
+				System.out.println(this.la.getLastSymbol());
+				e0();
+			}else{
+				throw new Exception("Type mismatch error");
+			}
 		}
+		return type;
 	}
 
-	public void e1() throws Exception {
-		e2();
+	public Type e1() throws Exception {
+		Type type = e2();
 		while (this.la.have("+")) {
-			System.out.println(this.la.getLastSymbol());
-			e1();
+			if(la.isLastType(type.toString())){
+				System.out.println(this.la.getLastSymbol());
+				e1();
+			}else{
+				throw new Exception("Type mismatch error");
+			}
 		}
+		
+		return type;
 	}
 
-	public void e2() throws Exception {
+	public Type e2() throws Exception {
+		
+		Type type = null;
+		
 		try{
 			if (this.la.have("numeral")) {
 				System.out.println(this.la.getLastSymbol());
+				type = Type.INTEGER;
 			} else if (this.la.have("identifier")) {
 				System.out.println(this.la.getLastSymbol());
+				type = Type.IDENTIFIER;
 			} else if (this.la.have("booleanLiteral")) {
 				System.out.println(this.la.getLastSymbol());
+				type = Type.BOOLEAN;
 			}else{
 				throw new Exception("Can't have an empty expression");
 			}
 		}catch (Exception e){
 			throw new Exception("Unrecognised symbol");
 		}
+		
+		return type;
 	}
 
 	public void parse() {
