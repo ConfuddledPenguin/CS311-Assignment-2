@@ -33,19 +33,26 @@ public class TrivCompiler {
 	 * @throws FileNotFoundException
 	 */
 	TrivCompiler(String filename) throws FileNotFoundException {
-		this.la = new LexicalAnalyser(filename) {
-			
-			/**
-			 * Set the keywords to hunt for
-			 */
-			@Override
-			Set<String> getKeywords() {
-				Set<String> k = new HashSet<>();
-				k.add("let");
-				k.add("in");
-				return k;
-			}
-		};
+		
+		try{
+			this.la = new LexicalAnalyser(filename) {
+				
+				/**
+				 * Set the keywords to hunt for
+				 */
+				@Override
+				Set<String> getKeywords() {
+					Set<String> k = new HashSet<>();
+					k.add("let");
+					k.add("in");
+					return k;
+				}
+			};
+		} catch (FileNotFoundException e){
+			System.err.println("Error: Invalid file path");
+			System.err.println(e.getMessage());
+			System.exit(0);
+		}
 	}
 
 	/**
@@ -56,7 +63,20 @@ public class TrivCompiler {
 	 */
 	public static void main(String[] args) throws Exception {
 
-		TrivCompiler tc = new TrivCompiler("examples/example1.triv");
+		String filename = "examples/example.triv";
+		
+		if(args.length > 0){
+			
+			if(args.length == 1){
+				filename = args[0];
+			}else{
+				System.err.println("Incorrect ussage: To many arguements");
+				System.err.println("Args should be of the form: filepath");
+				System.exit(0);
+			}
+		}
+		
+		TrivCompiler tc = new TrivCompiler(filename);
 		tc.parse();
 
 	}

@@ -28,6 +28,8 @@ public class InputFile {
 		this.inputBytesLeftInBuffer = 0;
 		this.lastCharUnconsumed = false;
 		lastTwoCharUnconsumed = false;
+		
+		System.out.println("Using file at: " + filename);
 	}
 
 	private char getNextChar() throws Globals.ReadPastEndOfFileException {
