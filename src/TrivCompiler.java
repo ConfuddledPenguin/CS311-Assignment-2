@@ -68,7 +68,7 @@ public class TrivCompiler {
 				System.out.println(this.la.getLastSymbol());
 				e0();
 			}else{
-				throw new Exception("Type mismatch error");
+				throw new Exception("Type mismatch error. Expected type " + type + " got type " + la.lastType());
 			}
 		}
 		return type;
@@ -81,7 +81,7 @@ public class TrivCompiler {
 				System.out.println(this.la.getLastSymbol());
 				e1();
 			}else{
-				throw new Exception("Type mismatch error");
+				throw new Exception("Type mismatch error. Expected type " + type + " got type " + la.lastType());
 			}
 		}
 		

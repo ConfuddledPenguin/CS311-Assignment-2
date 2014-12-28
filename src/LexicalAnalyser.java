@@ -87,6 +87,11 @@ public abstract class LexicalAnalyser {
 		}
 		return false;
 	}
+	
+	public String lastType(){
+		
+		return lastLexeme;
+	}
 
 	public boolean have(String target) throws Exception {
 		if (this.lastError != null) {
