@@ -1,0 +1,3 @@
+
+# quite a small example, but not trival!
+let x = 3 in let y = 3 in x + y == 5

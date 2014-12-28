@@ -1,5 +1,6 @@
+package trivCompiler;
+
 import java.io.FileNotFoundException;
-import java.security.acl.LastOwnerException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -19,6 +20,12 @@ public class TrivCompiler {
 			public String toString() {
 				return "booleanLiteral";
 			}
+		},
+		IDENTIFIER{
+			@Override
+			public String toString() {
+				return "identifier";
+			}
 		}
 	};
 	
@@ -32,7 +39,7 @@ public class TrivCompiler {
 	 * @param filename
 	 * @throws FileNotFoundException
 	 */
-	TrivCompiler(String filename) throws FileNotFoundException {
+	public TrivCompiler(String filename) throws FileNotFoundException {
 		
 		try{
 			this.la = new LexicalAnalyser(filename) {
@@ -64,6 +71,7 @@ public class TrivCompiler {
 	public static void main(String[] args) throws Exception {
 
 		String filename = "examples/example.triv";
+		filename = "tests/unexpectedEndOFInput.triv";
 		
 		if(args.length > 0){
 			
@@ -87,7 +95,13 @@ public class TrivCompiler {
 				System.out.println(this.la.getLastSymbol());
 				e0();
 			}else{
-				throw new Exception("Type mismatch error. Expected type " + type + " got type " + la.lastType());
+				
+				if(la.lastType().equals("eoi")){
+					throw new Exception("Program unexpectantly ended after " + la.getLastSymbol());
+				}
+				
+				throw new Exception("Type mismatch error. Expected type " + type + " got type " + 
+						la.lastType() + ", on " + la.getLastSymbol());
 			}
 		}
 		return type;
@@ -114,25 +128,22 @@ public class TrivCompiler {
 		
 		Type type = null;
 		
-		try{
-			if (this.la.have("numeral")) {
-				System.out.println(this.la.getLastSymbol());
-				type = Type.INTEGER;
-			} else if (this.la.have("identifier")) {
-				
-				String symbol = la.getLastSymbol();
-				type = vars.get(symbol);
-				System.out.println(symbol);
-			} else if (this.la.have("booleanLiteral")) {
-				System.out.println(this.la.getLastSymbol());
-				type = Type.BOOLEAN;
-			}else{
-				throw new Exception("Can't have an empty expression");
+		if (this.la.have("numeral")) {
+			System.out.println(this.la.getLastSymbol());
+			type = Type.INTEGER;
+		} else if (this.la.have("identifier")) {
+			
+			String symbol = la.getLastSymbol();
+			type = vars.get(symbol);
+			if(type == null){
+				throw new Exception("Undeclared variable: " + symbol);
 			}
-		}catch (Exception e){
-			System.out.println(la.lastType());
-			e.printStackTrace(System.out);
-			throw new Exception("Unrecognised symbol");
+			System.out.println(symbol);
+		} else if (this.la.have("booleanLiteral")) {
+			System.out.println(this.la.getLastSymbol());
+			type = Type.BOOLEAN;
+		}else{
+			throw new Exception("Empty expression found after " + la.getLastSymbol());
 		}
 		
 		return type;
@@ -156,7 +167,7 @@ public class TrivCompiler {
 //		System.out.println(vars);
 	}
 
-	private Type expression() throws Exception {
+	public Type expression() throws Exception {
 		
 		Type type = null;
 		
@@ -168,7 +179,11 @@ public class TrivCompiler {
 			
 			System.out.println(this.la.getLastSymbol());
 			
-			this.la.mustbe("identifier");
+			try{
+				this.la.mustbe("identifier");
+			}catch(Globals.UnexpectedSymbolException e){
+				throw new Exception("Missing variable declaration");
+			}
 			var = la.getLastSymbol();
 			System.out.println(var);
 			

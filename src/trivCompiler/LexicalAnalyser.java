@@ -1,3 +1,5 @@
+package trivCompiler;
+
 import java.io.FileNotFoundException;
 import java.util.Set;
 

@@ -1,3 +1,5 @@
+package trivCompiler;
+
 public class Globals {
 
 	@SuppressWarnings("serial")
