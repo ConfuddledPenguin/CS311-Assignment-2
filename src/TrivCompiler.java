@@ -1,10 +1,12 @@
 import java.io.FileNotFoundException;
+import java.security.acl.LastOwnerException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class TrivCompiler {
 
-	LexicalAnalyser la;
 	private enum Type {
 		INTEGER{
 			@Override
@@ -17,14 +19,12 @@ public class TrivCompiler {
 			public String toString() {
 				return "booleanLiteral";
 			}
-		},
-		IDENTIFIER{
-			@Override
-			public String toString() {
-				return "identifier";
-			}
 		}
 	};
+	
+	private Map<String, Type> vars = new HashMap<String, Type>();
+	LexicalAnalyser la;
+	
 
 	/**
 	 * Default constructor for the TrivCompiler
@@ -77,8 +77,7 @@ public class TrivCompiler {
 		}
 		
 		TrivCompiler tc = new TrivCompiler(filename);
-		tc.parse();
-
+		tc.parse();		
 	}
 
 	public Type e0() throws Exception {
@@ -96,12 +95,15 @@ public class TrivCompiler {
 
 	public Type e1() throws Exception {
 		Type type = e2();
+		Type lastType;
 		while (this.la.have("+")) {
-			if(la.isLastType(type.toString())){
-				System.out.println(this.la.getLastSymbol());
-				e1();
-			}else{
-				throw new Exception("Type mismatch error. Expected type " + type + " got type " + la.lastType());
+			
+			System.out.println(this.la.getLastSymbol());
+			lastType = e1();
+		
+			if(!(lastType == type)){
+				throw new Exception("Type mismatch error. Expected type " + type + " got type " + 
+										lastType + ", on " + la.getLastSymbol());
 			}
 		}
 		
@@ -117,8 +119,10 @@ public class TrivCompiler {
 				System.out.println(this.la.getLastSymbol());
 				type = Type.INTEGER;
 			} else if (this.la.have("identifier")) {
-				System.out.println(this.la.getLastSymbol());
-				type = Type.IDENTIFIER;
+				
+				String symbol = la.getLastSymbol();
+				type = vars.get(symbol);
+				System.out.println(symbol);
 			} else if (this.la.have("booleanLiteral")) {
 				System.out.println(this.la.getLastSymbol());
 				type = Type.BOOLEAN;
@@ -126,6 +130,8 @@ public class TrivCompiler {
 				throw new Exception("Can't have an empty expression");
 			}
 		}catch (Exception e){
+			System.out.println(la.lastType());
+			e.printStackTrace(System.out);
 			throw new Exception("Unrecognised symbol");
 		}
 		
@@ -142,23 +148,44 @@ public class TrivCompiler {
 
 			System.out.println("program is correctly formed");
 		} catch (Exception e) {
+			//TODO
+//			e.printStackTrace();
 			System.out.println("parse error: " + e.getMessage());
 		}
+		//TODO remove
+//		System.out.println(vars);
 	}
 
-	private void expression() throws Exception {
+	private Type expression() throws Exception {
+		
+		Type type = null;
+		
 		if (this.la.have("let")) {
+			
+			
+			String var = "";
+			Type varType = null;
+			
 			System.out.println(this.la.getLastSymbol());
+			
 			this.la.mustbe("identifier");
-			System.out.println(this.la.getLastSymbol());
+			var = la.getLastSymbol();
+			System.out.println(var);
+			
 			this.la.mustbe("=");
 			System.out.println(this.la.getLastSymbol());
-			expression();
+			varType = expression();
+			
 			this.la.mustbe("in");
 			System.out.println(this.la.getLastSymbol());
+			
+			vars.put(var, varType);
+			
 			expression();
 		} else {
-			e0();
+			type = e0();
 		}
+		
+		return type;
 	}
 }
