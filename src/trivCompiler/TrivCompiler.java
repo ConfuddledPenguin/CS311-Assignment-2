@@ -52,6 +52,9 @@ public class TrivCompiler {
 					Set<String> k = new HashSet<>();
 					k.add("let");
 					k.add("in");
+					k.add("if");
+					k.add("then");
+					k.add("else");
 					return k;
 				}
 			};
@@ -70,8 +73,7 @@ public class TrivCompiler {
 	 */
 	public static void main(String[] args) throws Exception {
 
-		String filename = "examples/example.triv";
-		filename = "tests/unexpectedEndOFInput.triv";
+		String filename = "examples/example1.triv";
 		
 		if(args.length > 0){
 			
@@ -94,11 +96,10 @@ public class TrivCompiler {
 			if(la.isLastType(type.toString())){
 				System.out.println(this.la.getLastSymbol());
 				e0();
+				type = Type.BOOLEAN;
 			}else{
 				
-				if(la.lastType().equals("eoi")){
-					throw new Exception("Program unexpectantly ended after " + la.getLastSymbol());
-				}
+				checkForUnexpectedEnding();
 				
 				throw new Exception("Type mismatch error. Expected type " + type + " got type " + 
 						la.lastType() + ", on " + la.getLastSymbol());
@@ -163,8 +164,6 @@ public class TrivCompiler {
 //			e.printStackTrace();
 			System.out.println("parse error: " + e.getMessage());
 		}
-		//TODO remove
-//		System.out.println(vars);
 	}
 
 	public Type expression() throws Exception {
@@ -197,10 +196,71 @@ public class TrivCompiler {
 			vars.put(var, varType);
 			
 			expression();
+		} else if(la.have("if")){
+			
+			System.out.println(la.getLastSymbol());
+			
+			mustHaveSymbol("(");
+			
+			type = expression();
+			
+			mustHaveSymbol(")");
+			
+			if( type != Type.BOOLEAN){
+				throw new Exception("If statement must be followed by a boolean expression");
+			}
+			
+			if(la.have("then")){
+				System.out.println(la.getLastSymbol());
+				expression();
+				
+				if(la.have("else")){
+					System.out.println(la.getLastSymbol());
+					expression();
+				}
+			}else{
+				mustHaveSymbol("{");
+				expression();
+				mustHaveSymbol("}");
+				
+				if(la.have("else")){
+					System.out.println(la.getLastSymbol());
+					mustHaveSymbol("{");
+					expression();
+					mustHaveSymbol("}");
+				}
+			}
+			
 		} else {
 			type = e0();
 		}
 		
 		return type;
+	}
+	
+	/**
+	 * Wonders if the next symbol is as specified
+	 * 
+	 * @param c
+	 * @throws Exception
+	 */
+	private void mustHaveSymbol(String str) throws Exception{
+		
+		if(str == null){
+			throw new Exception("Cant expect a null. The Dev has screwed up");
+		}
+		
+		if(la.have(str)){
+			System.out.println(la.getLastSymbol());
+		}else{
+			throw new Exception("Expected '" + str + "' after '" + la.getLastSymbol() + "' found '" + la.getCurrentSymbol() + "'");
+		}
+	}
+	
+	private void checkForUnexpectedEnding() throws Exception {
+		
+		if(la.lastType().equals("eoi")){
+			throw new Exception("Program unexpectantly ended after " + la.getLastSymbol());
+		}
 	}
 }

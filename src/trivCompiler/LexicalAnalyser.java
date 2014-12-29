@@ -45,6 +45,7 @@ public abstract class LexicalAnalyser {
 	private StringBuffer lastSymbol;
 
 	private String lastSymbolBuffer;
+	private String currentSymbol;
 
 	private String lastLexeme;
 
@@ -81,6 +82,10 @@ public abstract class LexicalAnalyser {
 		return this.lastSymbolBuffer;
 	}
 	
+	public String getCurrentSymbol(){
+		return currentSymbol;
+	}
+	
 	public boolean isLastType(String target){
 
 		
@@ -112,7 +117,7 @@ public abstract class LexicalAnalyser {
 			return false;
 		}
 	}
-
+	
 	public void mustbe(String target) throws Exception {
 		if (this.lastError != null) {
 			throw this.lastError;
@@ -177,6 +182,9 @@ public abstract class LexicalAnalyser {
 					res = s;
 				} else if (s.equals("true") || s.equals("false")) {
 					res = "booleanLiteral";
+				} else if (s.equals("(") || s.equals(")") || s.equals("[") ||
+							s.equals("]") || s.equals("{") || s.equals("}")){
+					res = "bracket";
 				} else {
 					res = "identifier";
 				}
@@ -198,6 +206,7 @@ public abstract class LexicalAnalyser {
 			}
 		}
 
+		currentSymbol = lastSymbol.toString();
 		return res;
 	}
 
