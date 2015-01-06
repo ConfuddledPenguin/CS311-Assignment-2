@@ -84,6 +84,8 @@ public class TrivCompiler {
 		
 		if(args.length > 0){
 			
+//			System.out.println(args.length);
+			
 			if(args.length == 1){
 				filename = args[0];
 				
@@ -291,7 +293,6 @@ public class TrivCompiler {
 				Result thenResult = expression();
 				
 				mustHaveSymbol("else");
-				System.out.println(la.getLastSymbol());
 				Result elseResult = expression();
 				
 				if((boolean)result.value){
@@ -305,7 +306,6 @@ public class TrivCompiler {
 				mustHaveSymbol("}");
 				
 				mustHaveSymbol("else");
-				System.out.println(la.getLastSymbol());
 				mustHaveSymbol("{");
 				Result elseResult = expression();
 				mustHaveSymbol("}");
