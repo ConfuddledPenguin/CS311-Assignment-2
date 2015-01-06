@@ -31,7 +31,7 @@ public class InputFile {
 		this.lastCharUnconsumed = false;
 		lastTwoCharUnconsumed = false;
 		
-		System.out.println("Using file at: " + filename);
+		System.out.println("Using file at: " + filename + "\n");
 	}
 
 	private char getNextChar() throws Globals.ReadPastEndOfFileException {
